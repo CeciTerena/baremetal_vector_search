@@ -3,3 +3,4 @@ kernel=kernel8.img
 enable_uart=1
 uart_2ndstage=1
 disable_commandline_tags=1
+initramfs data.bin 0x10000000

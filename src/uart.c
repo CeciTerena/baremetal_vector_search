@@ -29,32 +29,64 @@ void uart_init(void) {
     UART0_CR = UART0_CR_UARTEN | UART0_CR_TXE | UART0_CR_RXE;
 }
 
-void uart_putc(uint8_t c) {
+// -------- TX ----------------
+
+void uart_tx_byte(uint8_t c) {
     while (UART0_FR & UART0_FR_TXFF) {} // wait while transmit fifo queue is full
     UART0_DR = c;
 }
 
-void uart_write(const uint8_t *data, size_t len) {
+void uart_tx(const uint8_t *data, size_t len) {
     for (size_t i = 0; i < len; i++) {
-        uart_putc(data[i]);
+        uart_tx_byte(data[i]);
     }
 }
 
-void uart_puts(const char *s) {
+// -------- PRINT ----------------
+
+void uart_print_u64_dec(uint64_t val) {
+    char buf[21];
+    int i = 0;
+    if (val == 0) {
+        uart_tx_byte('0');
+        return;
+    }
+    // digits extracted from end to start. 
+    while (val > 0) {
+        buf[i++] = '0' + (val % 10);
+        val /= 10;
+    }
+    // then outputted in the correct order
+    for (int j = i - 1; j >= 0; j--) {
+        uart_tx_byte(buf[j]);
+    }
+}
+
+void uart_print_hex(uint64_t val) {
+    static const char hex_digits[] = "0123456789abcdef";
+    uart_print("0x");
+    for (int shift = 60; shift >= 0; shift -= 4) {
+        uart_tx_byte(hex_digits[(val >> shift) & 0xF]);
+    }
+}
+
+void uart_print(const char *s) {
     for (size_t i = 0; s[i] != '\0'; i++) {
         if (s[i] == '\n') {
-            uart_putc('\r');
+            uart_tx_byte('\r');
         }
-        uart_putc(s[i]);
+        uart_tx_byte(s[i]);
     }
 }
 
-uint8_t uart_getc(void) {
+// -------- RX ----------------
+
+uint8_t uart_rx_byte(void) {
     while (UART0_FR & UART0_FR_RXFE) {} // while recv fifo queue is empty, wait --> BLOCKING!!!!!
     return (uint8_t)(UART0_DR & 0xFFu); // keeps only the low 8 bits
 }
 
-int16_t uart_try_getc(void) {
+int16_t uart_try_rx_byte(void) {
     if (UART0_FR & UART0_FR_RXFE) { 
         return -1;  
     }
