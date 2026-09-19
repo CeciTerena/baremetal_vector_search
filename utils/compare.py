@@ -34,6 +34,8 @@ def load_ivecs(path):
 # --------------------------------
 
 # Im gonna try to build this modularly, so that datasets can be added, loaded and parsed acordingly!
+# A simmilar aproach to the algorithms. HOW the comparision is done changes a bit between them. So i want to be able to modularly apply that too. 
+# All automatically done, based on the tags after BEGIN. Which will specify the algorithm and dataset. 
 DATASETS = {"siftsmall": DATA_FOLDER / "siftsmall/siftsmall_groundtruth.ivecs"}
 ALGORITHMS = {"brute": compare_brute}
 

@@ -4,6 +4,10 @@
 #include "checksum.h"
 #include "mem_map.h"
 #include "dataset.h"
+#include "search.h"
+
+#define MAX_QUERIES 100
+static uint32_t results[MAX_QUERIES * K];
 
 static void delay(uint32_t count) {
     while (count--) {
@@ -11,58 +15,43 @@ static void delay(uint32_t count) {
     }
 }
 
-static bool check_block(uint32_t magic, const struct dataset_header *header) {
-    const uint8_t *data = (const uint8_t *)header + sizeof(*header);
-    if (header->magic != magic) {
-        uart_print("Dataset header magic mismatch\n");
-        return false;
-    }
-    size_t data_bytes = (size_t)header->n * (size_t)header->dim;
-    uart_print("\nNumber of vectors: ");
-    uart_print_u64_dec(header->n);
-    uart_print("\nNumber of dimentions: ");
-    uart_print_u64_dec(header->dim);
-    uart_print("\nChecksum: ");
-    uart_print_hex(checksum_fnv1a_32(data, data_bytes));
+// Log format
+// BEGIN <algo> dataset=<name> K=<k> NQ=<n>
+// R <query> <id_0> ... <id_K-1>  --> one line per query
+// END
+// the dataset is still hardcoded... FIX THAT LATER AAAAA
+static void print_results(const struct dataset *ds, const uint32_t *res) {
+    uart_print("BEGIN brute dataset=siftsmall K=");
+    uart_print_u64_dec(K);
+    uart_print(" NQ=");
+    uart_print_u64_dec(ds->n_queries);
     uart_print("\n");
-    return true;
-}
 
-static bool check_dataset(void) {
-    const struct dataset_header *vec_header = (const struct dataset_header *)DATASET_BASE;
-    uart_print("--------- vector block check --------- \n");
-    if (check_block(VECS, vec_header) == false){
-        uart_print("FAIL: vector block check\n");
-        return false;
+    for (uint32_t query = 0; query < ds->n_queries; query++) {
+        uart_print("R ");
+        uart_print_u64_dec(query);
+        for (size_t k = 0; k < K; k++) {
+            uart_print(" ");
+            uart_print_u64_dec(res[(size_t)query * K + k]);
+        }
+        uart_print("\n");
     }
-
-    const struct dataset_header *query_header = get_next_header(vec_header);
-    uart_print("--------- query block check --------- \n");
-    if (check_block(QURY, query_header) == false){
-        uart_print("FAIL: query block check\n");
-        return false;
-    }
-
-    if (vec_header->dim != query_header->dim){
-        uart_print("Mismatch: vector dimentions differ from query dimentions\n");
-        return false;
-    }
-    return true;
+    uart_print("END\n");
 }
 
 void main(void) {
-    gpio_set_function(ACT_LED_PIN, GPIO_FN_OUTPUT);
-    gpio_set(ACT_LED_PIN);
-
     uart_init();
-
-    uart_print("Ok we will try out this checksum thing now\n");
     delay(1000);
-    bool ok = check_dataset();
+    struct dataset ds;
+
+    bool ok = dataset_load(&ds);
     if (ok == false) {
         uart_print("Dataset ERR\n");
         return;
     }
     uart_print("Dataset OK\n");
+
+    knn_brute_force(ds.vectors, ds.n_vecs, ds.queries, ds.n_queries, ds.dim, results);
+    print_results(&ds, results);
     return;
 }

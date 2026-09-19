@@ -7,6 +7,14 @@
 #define VECS 0x53434556u
 #define QURY 0x59525551u
 
+struct dataset {
+    const uint8_t *vectors;
+    const uint8_t *queries;
+    uint32_t n_vecs;
+    uint32_t n_queries;
+    uint32_t dim; 
+};
+
 struct dataset_header {
     uint32_t magic;
     uint32_t n;
@@ -23,5 +31,7 @@ static inline const struct dataset_header *get_next_header(const struct dataset_
     size_t block_bytes = align16(sizeof(*header) + (size_t)header->n * header->dim);
     return (const struct dataset_header *)((const uint8_t *)header + block_bytes);
 }
+
+bool dataset_load(struct dataset *ds);
 
 #endif
