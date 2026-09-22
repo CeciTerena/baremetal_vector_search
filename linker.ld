@@ -35,4 +35,10 @@ SECTIONS
     . = ALIGN(16);
     . = . + 0x4000; /*16KB stack*/
     __stack_top = .;
+    . = ALIGN(16);
+    __heap_start = .;
+    __heap_end = 0x10000000;
+    /*to ensure that the database start (which is also heap end) is strictly above heap start!!! IN case everything else before the heap grows too large...*/
+    ASSERT(__heap_start < __heap_end, "heap_start overshot heap_end. give more space to the heap girl!!!") 
+    /*linker stands for lol i'm not knowlowedgeable enough rightnow (to write good comments and error messages)*/
 }

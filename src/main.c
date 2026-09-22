@@ -2,7 +2,7 @@
 #include "peripherals.h"
 #include "uart.h"
 #include "checksum.h"
-#include "mem_map.h"
+#include "mem_management.h"
 #include "dataset.h"
 #include "search.h"
 
