@@ -3,6 +3,22 @@
 .global _start
 
 _start:
+    // enabling floating point / SIMD. 
+    mrs     x0, CurrentEL
+    lsr     x0, x0, #2
+    and     x0, x0, #3
+    cmp     x0, #2
+    b.ne    fp_el1              // not at EL2
+
+    mrs     x1, cptr_el2
+    bic     x1, x1, #(1 << 10)  // clear TFP -> no FP/SIMD trap at EL2
+    msr     cptr_el2, x1
+
+    fp_el1:
+    mov     x1, #(3 << 20)      // FPEN = 0b11 -> no trap at EL1/EL0
+    msr     cpacr_el1, x1
+    isb
+
     // each core has this mpird register that tells which core we are in
     mrs     x0, mpidr_el1       // move register from system register --> read MPIDR_EL1 into a general purpose register x0.
     and     x0, x0, #3          // mask to just the lower 2 bits (3 = 11, encodes cores 0-3)

@@ -4,7 +4,7 @@ OBJCOPY := $(CROSS)objcopy
 
 BUILD_DIR := build
 
-CFLAGS  := -std=c23 -ffreestanding -mgeneral-regs-only -O2 \
+CFLAGS  := -std=c23 -ffreestanding -O2 \
            -Wall -Wextra -Wpedantic -Werror -Iinclude
 LDFLAGS := -nostdlib -T linker.ld
 

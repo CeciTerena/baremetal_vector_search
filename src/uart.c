@@ -79,6 +79,24 @@ void uart_print(const char *s) {
     }
 }
 
+void uart_print_float(float val, uint8_t precision) {
+    if (val < 0) {
+        uart_tx_byte('-');
+        val = -val;
+    }
+    uint64_t integer_part = (uint64_t)val;
+    uart_print_u64_dec(integer_part);
+    uart_tx_byte('.');
+    float fractional = val - (float)integer_part;
+    for (uint8_t i = 0; i < precision; i++) {
+        fractional *= 10.0f;
+        uint64_t digit = (uint64_t)fractional;
+        uart_print_u64_dec(digit);
+        fractional -= digit;
+    }
+}
+
+
 // -------- RX ----------------
 
 uint8_t uart_rx_byte(void) {

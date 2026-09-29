@@ -42,6 +42,34 @@ static void print_results(const struct dataset *ds, const uint32_t *res) {
 void main(void) {
     uart_init();
     delay(1000);
+
+    float test_float = 16.8 * 2.378;
+    uart_print("TEST FLOAT PRINT: ");
+    uart_print_float(test_float, 4);
+    uart_print("\n");
+
+    struct bump_allocator allocator;
+    bump_allocator_init(&allocator);
+    uart_print("heap base ");
+    uart_print_hex(allocator.base);
+    uart_print(" size ");
+    uart_print_u64_dec(allocator.total_size);
+    uart_print("\n");
+
+    void *a = NULL;
+    void *b = NULL;
+    if (bump_alloc(&allocator, 100, &a) != BUMP_ALLOC_OK || bump_alloc(&allocator, 16000, &b) != BUMP_ALLOC_OK) {
+        uart_print("bump_alloc ERR\n");
+        return;
+    }
+    uart_print("a ");
+    uart_print_hex((uintptr_t)a);
+    uart_print(" b ");
+    uart_print_hex((uintptr_t)b);
+    uart_print(" used ");
+    uart_print_u64_dec(allocator.used);
+    uart_print("\n");
+
     struct dataset ds;
 
     bool ok = dataset_load(&ds);
