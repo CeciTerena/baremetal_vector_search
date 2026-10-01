@@ -1,0 +1,1 @@
+console=tty1 console=serial0,115200 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-1790755841613

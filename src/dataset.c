@@ -25,8 +25,8 @@ static bool check_block(uint32_t magic, const struct dataset_header *header) {
     return true;
 }
 
-bool dataset_load(struct dataset *ds){
-    const struct dataset_header *vec_header = (const struct dataset_header *)DATASET_BASE;
+bool dataset_load(struct dataset *ds, const void *base){
+    const struct dataset_header *vec_header = (const struct dataset_header *)base;
 
     uart_print("--------- vector block check --------- \n");
     if (check_block(VECS, vec_header) == false){

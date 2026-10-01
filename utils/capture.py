@@ -36,7 +36,7 @@ def main():
                     params = dict(PARAM_RE.findall(m.group("params")))
                 elif END_RE.match(line):
                     if algo:
-                        save_log(output, f"{algo}_{params['dataset']}")
+                        save_log(output, f"{algo}_{params['dataset']}_{params['platform']}")
                     else:  # in case a capture start mid run.
                         print("END without BEGIN, capture NOT saved")
                     algo = None

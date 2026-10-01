@@ -23,6 +23,6 @@ struct dataset_header {
 };
 static_assert(sizeof(struct dataset_header) == 16);
 
-bool dataset_load(struct dataset *ds);
+bool dataset_load(struct dataset *ds, const void *base);
 
 #endif
