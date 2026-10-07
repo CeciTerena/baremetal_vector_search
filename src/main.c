@@ -43,6 +43,8 @@ void main(void) {
     uart_init();
     delay(1000);
 
+    uart_print("START\n");
+
     uart_print("MMU: enabling\n");
     mmu_enable();
     uart_print("MMU: on\n");
