@@ -22,6 +22,7 @@ def save_log(output, name, boot=None):
 
 def main():
     LOG_FOLDER.mkdir(exist_ok=True)
+    BOOT_FOLDER.mkdir(exist_ok=True)
     algo = None
     params = {}
     output = []

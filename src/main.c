@@ -9,6 +9,11 @@
 #include "bench.h"
 #include "mmu.h"
 
+#if BM_CACHE
+#define PLATFORM "baremetal_cache"
+#else
+#define PLATFORM "baremetal_nocache"
+#endif
 static uint32_t results[MAX_QUERIES * K];
 
 static void cycles_enable(void) {
@@ -45,9 +50,11 @@ void main(void) {
 
     uart_print("START\n");
 
-    uart_print("MMU: enabling\n");
-    mmu_enable();
-    uart_print("MMU: on\n");
+    #if BM_CACHE
+        uart_print("MMU: enabling\n");
+        mmu_enable();
+        uart_print("MMU: on\n");
+    #endif
 
     struct dataset ds;
 
@@ -66,8 +73,8 @@ void main(void) {
     uart_print_u64_dec(hz);
     uart_print("\n");
     
-    bench_measure(&ds, 20, results);
-    bench_report(&ds, 20, results, "baremetal_cache");
+    bench_measure(&ds, MAX_REPS, results);
+    bench_report(&ds, MAX_REPS, results, PLATFORM);
     uart_print("--------------------------------------\n");
 
     return;
