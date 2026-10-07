@@ -7,6 +7,7 @@
 #include "search.h"
 #include "timer.h"
 #include "bench.h"
+#include "mmu.h"
 
 static uint32_t results[MAX_QUERIES * K];
 
@@ -42,6 +43,10 @@ void main(void) {
     uart_init();
     delay(1000);
 
+    uart_print("MMU: enabling\n");
+    mmu_enable();
+    uart_print("MMU: on\n");
+
     struct dataset ds;
 
     bool ok = dataset_load(&ds, (const void *)DATASET_BASE);
@@ -54,12 +59,13 @@ void main(void) {
     
     uart_print("--------------------------------------\n");
     cycles_enable();
+    uint64_t hz = cpu_hz();
     uart_print("I cpu_hz=");
-    uart_print_u64_dec(cpu_hz());
+    uart_print_u64_dec(hz);
     uart_print("\n");
     
     bench_measure(&ds, 20, results);
-    bench_report(&ds, 20, results, "baremetal");
+    bench_report(&ds, 20, results, "baremetal_cache");
     uart_print("--------------------------------------\n");
 
     return;
