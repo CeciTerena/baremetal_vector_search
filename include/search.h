@@ -7,10 +7,10 @@
 #define K 10
 
 struct neighbour{
-    uint32_t distance;
+    float distance;
     uint32_t id;
 };
 
-void knn_brute_force(const uint8_t *vectors, uint32_t n_vecs, const uint8_t *queries, uint32_t n_queries, uint32_t dim, uint32_t *output);
+void knn_brute_force(const float *vectors, uint32_t n_vecs, const float *queries, uint32_t n_queries, uint32_t dim, uint32_t *output);
 
 #endif

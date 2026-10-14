@@ -20,7 +20,7 @@ SD_BM       := $(BUILD_DIR)/sd_bm_$(BM_VARIANT)
 SD_LINUX    := $(BUILD_DIR)/sd_linux
 BUILD_LINUX := $(BUILD_DIR)/linux
 
-COMMON_CFLAGS := -std=c23 -O2 -Wall -Wextra -Wpedantic -Werror -Iinclude
+COMMON_CFLAGS := -std=c23 -O3 -fassociative-math -fno-signed-zeros -fno-trapping-math -Wall -Wextra -Wpedantic -Werror -Iinclude
 
 CFLAGS  := $(COMMON_CFLAGS) -ffreestanding -DBM_CACHE=$(CACHE)
 LDFLAGS := -nostdlib -T linker.ld

@@ -4,7 +4,7 @@
 #include "dataset.h"
 
 static inline const struct dataset_header *get_next_header(const struct dataset_header *header) {
-    size_t block_bytes = align16(sizeof(*header) + (size_t)header->n * header->dim);
+    size_t block_bytes = align16(sizeof(*header) + (size_t)header->n * header->dim * sizeof(float));
     return (const struct dataset_header *)((const uint8_t *)header + block_bytes);
 }
 
@@ -14,7 +14,7 @@ static bool check_block(uint32_t magic, const struct dataset_header *header) {
         uart_print("Dataset header magic mismatch\n");
         return false;
     }
-    size_t data_bytes = (size_t)header->n * (size_t)header->dim;
+    size_t data_bytes = (size_t)header->n * (size_t)header->dim * sizeof(float);
     uart_print("\nNumber of vectors: ");
     uart_print_u64_dec(header->n);
     uart_print("\nNumber of dimentions: ");
@@ -46,8 +46,8 @@ bool dataset_load(struct dataset *ds, const void *base){
         return false;
     }
 
-    const uint8_t *vectors = (const uint8_t *)vec_header + sizeof(*vec_header);
-    const uint8_t *queries = (const uint8_t *)query_header + sizeof(*query_header);
+    const float *vectors = (const float *)((const uint8_t *)vec_header + sizeof(*vec_header));
+    const float *queries = (const float *)((const uint8_t *)query_header + sizeof(*query_header));
     uint32_t n_vecs = vec_header->n;
     uint32_t n_queries = query_header->n;
     uint32_t dim = vec_header->dim;

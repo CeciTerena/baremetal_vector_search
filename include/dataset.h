@@ -8,8 +8,8 @@
 #define QURY 0x59525551u
 
 struct dataset {
-    const uint8_t *vectors;
-    const uint8_t *queries;
+    const float *vectors;
+    const float *queries;
     uint32_t n_vecs;
     uint32_t n_queries;
     uint32_t dim; 

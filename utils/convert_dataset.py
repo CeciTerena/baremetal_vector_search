@@ -28,11 +28,7 @@ def block_convert(path, magic):
     vectors = fv[:, 1:]
     n = vectors.shape[0]
 
-    assert np.all(vectors == np.round(vectors))
-    assert vectors.min() >= 0 and vectors.max() <= 255
-
-    # right now I dont have support for floats, so the numbers need to be ints
-    data = vectors.astype(np.uint8)
+    data = vectors.astype('<f4')
     header = np.array([magic, n, dim, 0], dtype='<u4')
 
     block = header.tobytes() + data.tobytes()

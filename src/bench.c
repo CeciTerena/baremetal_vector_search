@@ -43,7 +43,7 @@ void bench_measure_batch(const struct dataset *ds, uint32_t reps, uint32_t *resu
 void bench_measure_queries(const struct dataset *ds, uint32_t reps, uint32_t *results) {
     for (uint32_t rep = 0; rep < reps; rep++) {
         for (uint32_t q = 0; q < ds->n_queries; q++) {
-            const uint8_t *query = ds->queries + (size_t)q * ds->dim;
+            const float *query = ds->queries + (size_t)q * ds->dim;
             uint64_t t0 = timer_ticks();
             knn_brute_force(ds->vectors, ds->n_vecs, query, 1, ds->dim, results + (size_t)q * K);
             uint64_t t1 = timer_ticks();
