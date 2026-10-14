@@ -10,6 +10,7 @@
 #include "dataset.h"
 #include "search.h"
 #include "bench.h"
+#include "pmu.h"
 
 
 // arbitrary 16kb, should be big enough
@@ -105,6 +106,8 @@ int main(void) {
     uart_print_u64_dec(cpu_hz());
     uart_print("\n");
 
+    pmu_init();
+
     uart_print("--------------------------------------\n");
     struct rusage before, after;
 
@@ -114,11 +117,13 @@ int main(void) {
     snapshot("/proc/interrupts", interrupts_before, sizeof interrupts_before);
     getrusage(RUSAGE_SELF, &before);
 
-    bench_measure(&ds, MAX_REPS, results);
+    bench_measure_batch(&ds, MAX_REPS, results);
 
     getrusage(RUSAGE_SELF, &after);
     snapshot("/proc/interrupts", interrupts_after, sizeof interrupts_after);
     int cpu_end = sched_getcpu();
+
+    bench_measure_queries(&ds, MAX_REPS, results);
 
     print_os_events(before, after, cpu_start, cpu_end);
 

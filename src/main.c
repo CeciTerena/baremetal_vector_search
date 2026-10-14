@@ -8,6 +8,7 @@
 #include "timer.h"
 #include "bench.h"
 #include "mmu.h"
+#include "pmu.h"
 
 #if BM_CACHE
 #define PLATFORM "baremetal_cache"
@@ -16,25 +17,12 @@
 #endif
 static uint32_t results[MAX_QUERIES * K];
 
-static void cycles_enable(void) {
-    __asm__ volatile("msr pmcr_el0, %0" :: "r"((1ULL << 0) | (1ULL << 6)));
-    __asm__ volatile("msr pmcntenset_el0, %0" :: "r"(1ULL << 31));
-    __asm__ volatile("msr pmccfiltr_el0, %0" :: "r"(1ULL << 27));
-    __asm__ volatile("isb");
-}
-
-static inline uint64_t cycles(void) {
-    uint64_t c;
-    __asm__ volatile("isb\n\tmrs %0, pmccntr_el0" : "=r"(c));
-    return c;
-}
-
 static uint64_t cpu_hz(void) {
     uint64_t t0 = timer_ticks();
-    uint64_t c0 = cycles();
+    uint64_t c0 = pmu_cycles();
     while (timer_ticks() - t0 < timer_freq()) {
     }
-    uint64_t c1 = cycles();
+    uint64_t c1 = pmu_cycles();
     return c1 - c0;
 }
 
@@ -67,14 +55,20 @@ void main(void) {
 
     
     uart_print("--------------------------------------\n");
-    cycles_enable();
+    pmu_cycles_enable();
     uint64_t hz = cpu_hz();
     uart_print("I cpu_hz=");
     uart_print_u64_dec(hz);
     uart_print("\n");
     
+    pmu_init();
+    uart_print("I pmu_supported=");
+    uart_print_hex(pmu_supported_events());
+    uart_print("\n");
+    
     bench_warmup(&ds, results);
-    bench_measure(&ds, MAX_REPS, results);
+    bench_measure_batch(&ds, MAX_REPS, results);
+    bench_measure_queries(&ds, MAX_REPS, results);
     bench_report(&ds, MAX_REPS, results, PLATFORM);
     uart_print("--------------------------------------\n");
 

@@ -3,9 +3,13 @@
 #include "search.h"
 #include "timer.h"
 #include "uart.h"
+#include "pmu.h"
+
 
 static uint64_t batch_ticks[MAX_REPS];
 static uint64_t query_ticks[MAX_REPS * MAX_QUERIES];
+
+static struct pmu_counts pmu_counts;
 
 // actually measuring the ammput of time that timing things takes (time the reading itself takes!).
 static uint64_t timer_overhead(void) {
@@ -24,21 +28,25 @@ void bench_warmup(const struct dataset *ds, uint32_t *results) {
     knn_brute_force(ds->vectors, ds->n_vecs, ds->queries, ds->n_queries, ds->dim, results);
 }
 
-void bench_measure(const struct dataset *ds, uint32_t reps, uint32_t *results) {
+void bench_measure_batch(const struct dataset *ds, uint32_t reps, uint32_t *results) {
+    pmu_start();
     for (uint32_t rep = 0; rep < reps; rep++) {
-
-        //batch measurement
         uint64_t t0 = timer_ticks();
         knn_brute_force(ds->vectors, ds->n_vecs, ds->queries, ds->n_queries, ds->dim, results);
         uint64_t t1 = timer_ticks();
         batch_ticks[rep] = t1 - t0;
+    }
+    pmu_stop();
+    pmu_read(&pmu_counts);
+}
 
-        // per query measurement
+void bench_measure_queries(const struct dataset *ds, uint32_t reps, uint32_t *results) {
+    for (uint32_t rep = 0; rep < reps; rep++) {
         for (uint32_t q = 0; q < ds->n_queries; q++) {
             const uint8_t *query = ds->queries + (size_t)q * ds->dim;
-            t0 = timer_ticks();
+            uint64_t t0 = timer_ticks();
             knn_brute_force(ds->vectors, ds->n_vecs, query, 1, ds->dim, results + (size_t)q * K);
-            t1 = timer_ticks();
+            uint64_t t1 = timer_ticks();
             query_ticks[(size_t)rep * MAX_QUERIES + q] = t1 - t0;
         }
     }
@@ -47,6 +55,13 @@ void bench_measure(const struct dataset *ds, uint32_t reps, uint32_t *results) {
 static void print_kv(const char *key, uint64_t val) {
     uart_print(key);
     uart_print_u64_dec(val);
+}
+
+static void print_pmu(const char *name, uint64_t val) {
+    uart_print("I pmu_");
+    uart_print(name);
+    print_kv("=", val);
+    uart_print("\n");
 }
 
 void bench_report(const struct dataset *ds, uint32_t reps, const uint32_t *results, const char* platform) {
@@ -61,6 +76,12 @@ void bench_report(const struct dataset *ds, uint32_t reps, const uint32_t *resul
     uart_print("\n");
     print_kv("I timer_overhead_ticks=", timer_overhead());
     uart_print("\n");
+
+    print_pmu("cycles", pmu_counts.cycles);
+    for (uint32_t i = 0; i < PMU_N_EVENTS; i++) {
+        print_pmu(pmu_events[i].name, pmu_counts.events[i]);
+    }
+    print_pmu("overflow", pmu_counts.overflow);
 
     for (uint32_t rep = 0; rep < reps; rep++) {
         print_kv("B ", rep);

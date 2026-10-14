@@ -8,7 +8,8 @@
 #define MAX_QUERIES 100
 
 void bench_warmup(const struct dataset *ds, uint32_t *results);
-void bench_measure(const struct dataset *ds, uint32_t reps, uint32_t *results);
+void bench_measure_batch(const struct dataset *ds, uint32_t reps, uint32_t *results);
+void bench_measure_queries(const struct dataset *ds, uint32_t reps, uint32_t *results);
 
 // FORMATTTTT
 //                      BEGIN <algo> dataset=<name> platform=<baremetal|linux> K=<k> NQ=<n> REPS=<r>
