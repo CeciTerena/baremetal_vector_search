@@ -73,6 +73,7 @@ void main(void) {
     uart_print_u64_dec(hz);
     uart_print("\n");
     
+    bench_warmup(&ds, results);
     bench_measure(&ds, MAX_REPS, results);
     bench_report(&ds, MAX_REPS, results, PLATFORM);
     uart_print("--------------------------------------\n");

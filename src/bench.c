@@ -20,10 +20,11 @@ static uint64_t timer_overhead(void) {
     return min;
 }
 
-void bench_measure(const struct dataset *ds, uint32_t reps, uint32_t *results) {
-    // warmup
+void bench_warmup(const struct dataset *ds, uint32_t *results) {
     knn_brute_force(ds->vectors, ds->n_vecs, ds->queries, ds->n_queries, ds->dim, results);
+}
 
+void bench_measure(const struct dataset *ds, uint32_t reps, uint32_t *results) {
     for (uint32_t rep = 0; rep < reps; rep++) {
 
         //batch measurement

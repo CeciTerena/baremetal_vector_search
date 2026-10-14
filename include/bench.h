@@ -7,6 +7,7 @@
 #define MAX_REPS 20
 #define MAX_QUERIES 100
 
+void bench_warmup(const struct dataset *ds, uint32_t *results);
 void bench_measure(const struct dataset *ds, uint32_t reps, uint32_t *results);
 
 // FORMATTTTT

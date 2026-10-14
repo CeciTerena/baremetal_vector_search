@@ -11,7 +11,7 @@ BAUD_RATE = 115200 # REMEMBER TO KEEP IT UP TO DATE WITH THE REST OF THE CODEBAS
 TIMEOUT = 1.0
 
 def save_log(output, name, boot=None):
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.datetime.now().strftime("%m-%d_%H:%M:%S")
     log_file = LOG_FOLDER / f"{name}_{timestamp}.log"
     with open(log_file, "w") as f:
         f.writelines(output)
