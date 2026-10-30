@@ -25,14 +25,14 @@ static uint64_t timer_overhead(void) {
 }
 
 void bench_warmup(const struct dataset *ds, uint32_t *results) {
-    knn_brute_force(ds->vectors, ds->n_vecs, ds->queries, ds->n_queries, ds->dim, results);
+    knn_brute_force(ds, results);
 }
 
 void bench_measure_batch(const struct dataset *ds, uint32_t reps, uint32_t *results) {
     pmu_start();
     for (uint32_t rep = 0; rep < reps; rep++) {
         uint64_t t0 = timer_ticks();
-        knn_brute_force(ds->vectors, ds->n_vecs, ds->queries, ds->n_queries, ds->dim, results);
+        knn_brute_force(ds, results);
         uint64_t t1 = timer_ticks();
         batch_ticks[rep] = t1 - t0;
     }
@@ -45,7 +45,7 @@ void bench_measure_queries(const struct dataset *ds, uint32_t reps, uint32_t *re
         for (uint32_t q = 0; q < ds->n_queries; q++) {
             const float *query = ds->queries + (size_t)q * ds->dim;
             uint64_t t0 = timer_ticks();
-            knn_brute_force(ds->vectors, ds->n_vecs, query, 1, ds->dim, results + (size_t)q * K);
+            knn_brute_force_query(ds, query, results + (size_t)q * K);
             uint64_t t1 = timer_ticks();
             query_ticks[(size_t)rep * MAX_QUERIES + q] = t1 - t0;
         }
